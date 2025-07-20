@@ -1,5 +1,7 @@
-Flask>=2.0
-Pillow>=9.0
-numpy>=1.21
-opencv-python>=4.5
-scikit-image>=0.19 
+Flask
+Pillow
+numpy
+tensorflow
+scikit-learn
+requests
+opencv-python 
