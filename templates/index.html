@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NosePass- Inclusive Drawing Game</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    
+    <!-- ResponsiveVoice for text-to-speech -->
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Baloo+2:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Stickers in corners -->
+    <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f31f.svg" class="sticker top-left" alt="star sticker">
+    <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f60a.svg" class="sticker top-right" alt="smile sticker">
+    <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f308.svg" class="sticker bottom-left" alt="rainbow sticker">
+    <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f98a.svg" class="sticker bottom-right" alt="koala sticker">
+    <!-- Wavy divider below header -->
+    <div class="wavy-divider">
+        <svg viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%" height="48"><path d="M0 0 Q 360 48 720 24 Q 1080 0 1440 48 V48 H0Z" fill="#b8f2c9"/></svg>
+    </div>
+    <div class="container-fluid">
+        <!-- Header -->
+        <header class="row nose-header py-3 mb-4">
+            <div class="col text-center">
+                <h1 class="display-4 mb-0">
+                    <i class="fas fa-nose me-2"></i>
+                    NosePass
+                </h1>
+                <p class="lead mb-0">Draw with your nose and learn!</p>
+            </div>
+        </header>
+
+        <!-- Top Row: Question and How to Play -->
+        <div class="row align-items-stretch mb-4 flex-wrap">
+            <!-- Question Area -->
+            <div class="col-md-6 mb-3 mb-md-0">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-question-circle me-2"></i>
+                            Question
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Level Info -->
+                        <div class="level-info mb-3">
+                            <h6>Level <span id="current-level">1</span> of 10</h6>
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%" id="progress-bar"></div>
+                            </div>
+                            <small class="text-muted">Progress: <span id="progress-text">0%</span></small>
+                        </div>
+                        <!-- Question Display -->
+                        <div class="question-area mb-4">
+                            <h6 class="text-muted">Question:</h6>
+                            <p class="question-text fs-5" id="question-text">Loading...</p>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-secondary btn-sm" id="speak-question">
+                                    <i class="fas fa-volume-up"></i> Speak Question
+                                </button>
+                                <button class="btn btn-outline-info btn-sm" id="show-hint" style="display: none;">
+                                    <i class="fas fa-lightbulb"></i> Hint
+                                </button>
+                            </div>
+                            <div id="hint-area" class="alert alert-info mt-2" style="display: none;">
+                                <small id="hint-text"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- How to Play Instructions -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-gamepad me-2"></i>
+                            How to Play
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="instructions mb-4">
+                            <ol class="small">
+                                <li>Click "Start Camera" to begin</li>
+                                <li>Position your face in front of the camera</li>
+                                <li>Click "Start Drawing" and move your nose to draw</li>
+                                <li>Draw the answer to the question</li>
+                                <li>Click "Submit" when finished</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drawing Area, Controls, and How to Play -->
+        <div class="row justify-content-center mb-4">
+            <!-- Drawing Area -->
+            <div class="col-lg-8 mb-3 mb-lg-0">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-paint-brush me-2"></i>
+                            Drawing Area
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <!-- Camera Container -->
+                        <div class="camera-container mb-3" style="position: relative; display: inline-block;">
+                            <video id="video" autoplay muted style="display: none; width: 320px; height: 240px; border: 2px solid #ccc; border-radius: 8px;"></video>
+                            <canvas id="face-canvas" style="position: absolute; top: 0; left: 0; display: none; pointer-events: none; width: 320px; height: 240px;"></canvas>
+                        </div>
+                        <!-- Drawing Canvas -->
+                        <div class="canvas-container">
+                            <canvas id="drawing-canvas" width="640" height="480" style="border: 3px solid #007bff; border-radius: 8px; background-color: white; cursor: crosshair;"></canvas>
+                        </div>
+                        <!-- Drawing Status -->
+                        <div class="drawing-status mt-3">
+                            <span class="badge bg-secondary" id="drawing-status">Ready to draw</span>
+                            <span class="badge bg-info ms-2" id="nose-status">Nose not detected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Controls Card -->
+            <div class="col-lg-4 mb-3 mb-lg-0">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sliders-h me-2"></i>
+                            Controls
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="controls mb-4">
+                            <button class="btn btn-success mb-2 w-100 bounce-on-hover" id="start-camera">
+                                <i class="fas fa-camera"></i> Start Camera
+                            </button>
+                            <button class="btn btn-primary mb-2 w-100 bounce-on-hover" id="start-drawing" disabled>
+                                <i class="fas fa-play"></i> Start Drawing
+                            </button>
+                            <button class="btn btn-warning mb-2 w-100 bounce-on-hover" id="stop-drawing" disabled>
+                                <i class="fas fa-pause"></i> Stop Drawing
+                            </button>
+                            <button class="btn btn-danger mb-2 w-100 bounce-on-hover" id="clear-canvas">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                            <button class="btn btn-info mb-2 w-100 bounce-on-hover" id="submit-drawing" disabled>
+                                <i class="fas fa-check"></i> Submit
+                            </button>
+                        </div>
+                        <!-- Status -->
+                        <div class="status-area">
+                            <div class="alert alert-info" id="status-message">
+                                Welcome! Click "Start Camera" to begin.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- How to Play Card Below 
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-8">
+                <div class="card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-gamepad me-2"></i>
+                            How to Play
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="instructions mb-4">
+                            <ol class="small">
+                                <li>Click "Start Camera" to begin</li>
+                                <li>Position your face in front of the camera</li>
+                                <li>Click "Start Drawing" and move your nose to draw</li>
+                                <li>Draw the answer to the question</li>
+                                <li>Click "Submit" when finished</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+                  
+                
+            
+       
+
+        <!-- Results Modal -->
+        <div class="modal fade" id="resultsModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="resultsTitle">Results</h5>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div id="results-content">
+                            <!-- Results will be inserted here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="next-question">Next Question</button>
+                        <button type="button" class="btn btn-secondary" id="try-again">Try Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/tracker.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <!-- At the end of the body, add a fun footer -->
+    <footer class="footer-fun">
+        <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f984.svg" class="mascot" alt="unicorn mascot">
+        <span>Keep drawing, keep smiling! You are amazing! 🌈</span>
+    </footer>
+</body>
+</html>

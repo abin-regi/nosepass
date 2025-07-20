@@ -1,0 +1,132 @@
+📌 Purpose:
+Implement a 2-player mode for an existing single-player “Nose Drawing Game” web app using Flask Blueprints. The multiplayer mode should allow two children to play simultaneously on one computer, drawing answers to the same question with their nose movements, and compete to get the highest accuracy score.
+
+🧒👧 Target Audience
+Children with disabilities or special needs (especially those with motor impairments), aged 6–12. The game must remain fun, simple, and colorful, with accessibility in mind.
+
+💡 Features to Implement:
+1. Modular Integration using Flask Blueprints
+Create a new blueprint module:
+
+Folder name: multiplayer
+
+Files: __init__.py, routes.py, templates/multiplayer.html, static/multiplayer.js, static/multiplayer.css
+
+Register blueprint in app.py with:
+
+python
+Copy
+Edit
+from multiplayer import multiplayer_bp
+app.register_blueprint(multiplayer_bp, url_prefix='/multiplayer')
+2. UI Design (Child-Friendly)
+Use a color scheme: 🎨
+
+Green for backgrounds, player frames
+
+White for canvases and camera borders
+
+Black for buttons and fonts
+
+Use child-themed fonts:
+
+Example: Google Fonts – Comic Neue, Sniglet, Chewy, or Fredoka One
+
+Use large, rounded buttons with icons and colorful borders (submit, clear, next)
+
+Include cute sounds/animations (optional)
+
+Layout:
+
+
+| Player 1              | Question Area             | Player 2              |
+| [Camera 1]            | [Question Text]           | [Camera 2]            |
+| [Drawing Canvas 1]    | [Submit / Clear / Timer]  | [Drawing Canvas 2]    |
+3. Gameplay Flow
+Display same question to both players.
+
+Player 1 starts first:
+
+Only Player 1's camera and canvas are visible.
+
+A timer starts (e.g., 30 seconds).
+
+After drawing, Player 1 clicks "Submit".
+
+Then Player 2's turn:
+
+Only Player 2's camera and canvas are shown now.
+
+Timer starts for Player 2.
+
+Player 2 submits.
+
+After both submit:
+
+Their drawings are sent to the backend.
+
+Similarity scores are computed using image recognition logic (SSIM, etc.).
+
+Show a “🎉 Player X Wins!” message or a tie message.
+
+Option to play next question or go to main menu.
+
+🧠 Backend Modules Needed
+Drawing recognition:
+
+Use skimage.metrics.structural_similarity or similar.
+
+Already present in the app — import and reuse ImageRecognizer.
+
+Score calculation:
+
+Compare player drawings with ground truth character/image for the level.
+
+Assign a percentage score.
+
+Multiplayer game manager logic:
+
+Track round count, player scores, turn switching.
+
+Could be managed using session or simple in-memory data for now.
+
+🧪 Testing
+Verify camera switching logic.
+
+Check accurate comparison of player drawings.
+
+Ensure timer works independently for both players.
+
+Ensure mobile responsiveness isn’t needed (desktop-only).
+
+🧩 Optional Extras (if time allows)
+
+Add confetti animation for winner.
+
+Add sound effects (e.g., buzzer, cheer, timer beep).
+
+Maintain accessibility: contrast ratios, alt-text, large fonts, keyboard-friendly.
+
+🗂 Output Files Structure
+vbnet
+
+multiplayer/
+├── __init__.py
+├── routes.py
+├── templates/
+│   └── multiplayer.html
+├── static/
+│   ├── multiplayer.js
+│   ├── multiplayer.css
+└── utils/
+    └── score_evaluator.py  # optional helper module
+✅ Prompt Instructions for AI Editor 
+Ensure the new module is fully contained in the multiplayer folder.
+
+Use Flask Blueprint pattern.
+
+Integrate into the main app via app.py.
+
+Maintain stylistic consistency with a playful, accessible UI for children.
+
+Keep code well-commented for educational clarity.

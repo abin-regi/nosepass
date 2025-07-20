@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nose Drawing Game - 2 Player Mode</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Fredoka+One&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('multiplayer.static', filename='multiplayer.css') }}">
+</head>
+<body>
+    <div class="container-fluid vh-100 d-flex flex-column">
+        <!-- Header -->
+        <div class="row bg-success text-white p-3">
+            <div class="col-12 text-center">
+                <h1 class="game-title mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    Nose Drawing Game - 2 Players
+                </h1>
+            </div>
+        </div>
+
+        <!-- Game Setup Screen -->
+        <div id="setup-screen" class="row flex-grow-1 align-items-center justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5 text-center">
+                        <h2 class="card-title mb-4">
+                            <i class="fas fa-play-circle text-success me-2"></i>
+                            Let's Play Together!
+                        </h2>
+                        
+                        <div class="mb-3">
+                            <label for="player1Name" class="form-label player-label">
+                                <i class="fas fa-user text-primary me-2"></i>
+                                Player 1 Name:
+                            </label>
+                            <input type="text" class="form-control player-input" id="player1Name" 
+                                   value="Player 1" maxlength="20">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="player2Name" class="form-label player-label">
+                                <i class="fas fa-user text-warning me-2"></i>
+                                Player 2 Name:
+                            </label>
+                            <input type="text" class="form-control player-input" id="player2Name" 
+                                   value="Player 2" maxlength="20">
+                        </div>
+                        
+                        <button id="start-game-btn" class="btn btn-lg game-btn start-btn">
+                            <i class="fas fa-rocket me-2"></i>
+                            Start Game!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+       <div id="game-screen" class="row flex-grow-1 d-none">
+            <!-- Player 1 Area -->
+            <div class="col-lg-4">
+                <div class="player-area" id="player1-area">
+                    <div class="player-header bg-primary text-white">
+                        <h3 class="player-name" id="player1-display">Player 1</h3>
+                        <div class="player-score">Score: <span id="player1-score">0</span>%</div>
+                    </div>
+                    
+                    <div class="camera-container" id="player1-camera-container">
+                        <video id="player1-video" class="camera-feed" autoplay muted></video>
+                        <canvas id="player1-face-canvas" class="face-overlay"></canvas>
+                    </div>
+                    
+                    <div class="canvas-container">
+                        <canvas id="player1-canvas" class="drawing-canvas"></canvas>
+                        <div class="canvas-overlay">
+                            <p class="canvas-text">Draw with your nose!</p>
+                        </div>
+                    </div>
+                    
+                    <div class="player-controls">
+                        <button id="player1-submit-btn" class="btn game-btn submit-btn" disabled>
+                            <i class="fas fa-check me-2"></i>Submit
+                        </button>
+                        <button id="player1-clear-btn" class="btn game-btn clear-btn">
+                            <i class="fas fa-eraser me-2"></i>Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question and Controls Area -->
+            <div class="col-lg-4">
+                <div class="question-area">
+                    <div class="question-header bg-success text-white">
+                        <h3><i class="fas fa-question-circle me-2"></i>Challenge</h3>
+                    </div>
+                    
+                    <div class="question-content">
+                        <p id="current-question" class="question-text">Loading question...</p>
+                        
+                        <div class="timer-container">
+                            <div class="timer-circle">
+                                <span id="timer-display">30</span>
+                            </div>
+                            <p class="timer-label">Seconds Left</p>
+                        </div>
+                        
+                        <div class="turn-indicator">
+                            <p id="turn-display" class="turn-text">Get Ready!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player 2 Area -->
+            <div class="col-lg-4">
+                <div class="player-area" id="player2-area">
+                    <div class="player-header bg-warning text-dark">
+                        <h3 class="player-name" id="player2-display">Player 2</h3>
+                        <div class="player-score">Score: <span id="player2-score">0</span>%</div>
+                    </div>
+                    
+                    <div class="camera-container" id="player2-camera-container">
+                        <video id="player2-video" class="camera-feed" autoplay muted></video>
+                        <canvas id="player2-face-canvas" class="face-overlay"></canvas>
+                    </div>
+                    
+                    <div class="canvas-container">
+                        <canvas id="player2-canvas" class="drawing-canvas"></canvas>
+                        <div class="canvas-overlay">
+                            <p class="canvas-text">Wait for your turn!</p>
+                        </div>
+                    </div>
+                    
+                    <div class="player-controls">
+                        <button id="player2-submit-btn" class="btn game-btn submit-btn" disabled>
+                            <i class="fas fa-check me-2"></i>Submit
+                        </button>
+                        <button id="player2-clear-btn" class="btn game-btn clear-btn">
+                            <i class="fas fa-eraser me-2"></i>Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="row flex-grow-1 align-items-center justify-content-center d-none">
+            <div class="col-md-8">
+                <div class="card shadow-lg border-0">
+                    <div class="card-body p-5 text-center">
+                        <div id="winner-announcement">
+                            <h1 class="winner-text mb-4">🎉 Great Job Everyone! 🎉</h1>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="player-result">
+                                    <h3 id="result-player1-name">Player 1</h3>
+                                    <div class="score-display">
+                                        <span id="result-player1-score">0</span>%
+                                    </div>
+                                    <p id="result-player1-feedback">Good job!</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="player-result">
+                                    <h3 id="result-player2-name">Player 2</h3>
+                                    <div class="score-display">
+                                        <span id="result-player2-score">0</span>%
+                                    </div>
+                                    <p id="result-player2-feedback">Good job!</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="result-buttons mt-4">
+                            <button id="next-question-btn" class="btn btn-lg game-btn success-btn me-3">
+                                <i class="fas fa-redo me-2"></i>
+                                Play Again
+                            </button>
+                            
+                            <button id="main-menu-btn" class="btn btn-lg game-btn secondary-btn">
+                                <i class="fas fa-home me-2"></i>
+                                Main Menu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay d-none">
+        <div class="loading-content">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="loading-text mt-3">Processing...</p>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- MediaPipe Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('multiplayer.static', filename='nose_tracker.js') }}"></script>
+    <script src="{{ url_for('multiplayer.static', filename='multiplayer.js') }}"></script>
+</body>
+</html>

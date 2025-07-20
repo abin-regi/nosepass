@@ -1,0 +1,167 @@
+/**
+ * NoseTracker - Handles nose tracking using MediaPipe FaceMesh
+ */
+class NoseTracker {
+    constructor() {
+        this.faceMesh = null;
+        this.camera = null;
+        this.isInitialized = false;
+        this.isTracking = false;
+        this.nosePosition = { x: 0, y: 0 };
+        this.lastNosePosition = { x: 0, y: 0 };
+        this.onNoseMove = null; // Callback for nose movement
+        this.onFaceDetected = null; // Callback for face detection
+        
+        // HTML elements
+        this.video = document.getElementById('video');
+        this.faceCanvas = document.getElementById('face-canvas');
+        this.faceCtx = this.faceCanvas.getContext('2d');
+        
+        this.initializeFaceMesh();
+    }
+    
+    initializeFaceMesh() {
+        console.log('Initializing MediaPipe FaceMesh...');
+        
+        this.faceMesh = new FaceMesh({
+            locateFile: (file) => {
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+            }
+        });
+        
+        this.faceMesh.setOptions({
+            maxNumFaces: 1,
+            refineLandmarks: true,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+        
+        this.faceMesh.onResults(this.onResults.bind(this));
+        
+        console.log('FaceMesh initialized successfully');
+        this.isInitialized = true;
+    }
+    
+    async startCamera() {
+        try {
+            console.log('Starting camera...');
+            
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: 640,
+                    height: 480
+                }
+            });
+            
+            this.video.srcObject = stream;
+            this.video.style.display = 'block';
+            this.faceCanvas.style.display = 'block';
+            
+            // Set canvas dimensions to match video
+            this.faceCanvas.width = 640;
+            this.faceCanvas.height = 480;
+            
+            this.camera = new Camera(this.video, {
+                onFrame: async () => {
+                    if (this.isTracking) {
+                        await this.faceMesh.send({ image: this.video });
+                    }
+                },
+                width: 640,
+                height: 480
+            });
+            
+            await this.camera.start();
+            this.isTracking = true;
+            
+            console.log('Camera started successfully');
+            return true;
+            
+        } catch (error) {
+            console.error('Error starting camera:', error);
+            throw new Error('Could not access camera. Please check permissions.');
+        }
+    }
+    
+    stopCamera() {
+        console.log('Stopping camera...');
+        
+        if (this.camera) {
+            this.camera.stop();
+        }
+        
+        if (this.video.srcObject) {
+            const tracks = this.video.srcObject.getTracks();
+            tracks.forEach(track => track.stop());
+            this.video.srcObject = null;
+        }
+        
+        this.video.style.display = 'none';
+        this.faceCanvas.style.display = 'none';
+        this.isTracking = false;
+        
+        console.log('Camera stopped');
+    }
+    
+    onResults(results) {
+        // Clear the face canvas
+        this.faceCtx.clearRect(0, 0, this.faceCanvas.width, this.faceCanvas.height);
+        
+        if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+            const landmarks = results.multiFaceLandmarks[0];
+            
+            // Get nose tip (landmark 1)
+            const noseTip = landmarks[1];
+            
+            if (noseTip) {
+                // Convert normalized coordinates to canvas coordinates
+                // Mirror the X coordinate to fix front camera mirroring issue
+                const x = (1 - noseTip.x) * this.faceCanvas.width;
+                const y = noseTip.y * this.faceCanvas.height;
+                
+                this.lastNosePosition = { ...this.nosePosition };
+                this.nosePosition = { x, y };
+                
+                // Draw nose indicator on face canvas
+                this.faceCtx.fillStyle = '#ff0000';
+                this.faceCtx.beginPath();
+                this.faceCtx.arc(x, y, 5, 0, 2 * Math.PI);
+                this.faceCtx.fill();
+                
+                // Call nose move callback if provided
+                if (this.onNoseMove) {
+                    this.onNoseMove(this.nosePosition, this.lastNosePosition);
+                }
+                
+                // Call face detected callback
+                if (this.onFaceDetected) {
+                    this.onFaceDetected(true);
+                }
+            }
+        } else {
+            // No face detected
+            if (this.onFaceDetected) {
+                this.onFaceDetected(false);
+            }
+        }
+    }
+    
+    setNoseMoveCallback(callback) {
+        this.onNoseMove = callback;
+    }
+    
+    setFaceDetectedCallback(callback) {
+        this.onFaceDetected = callback;
+    }
+    
+    isReady() {
+        return this.isInitialized && this.isTracking;
+    }
+    
+    getNosePosition() {
+        return this.nosePosition;
+    }
+}
+
+// Export for use in other files
+window.NoseTracker = NoseTracker;

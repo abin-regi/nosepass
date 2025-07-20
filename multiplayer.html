@@ -1,0 +1,73 @@
+<!-- Game Screen -->
+<div id="game-screen" class="row flex-grow-1 align-items-center justify-content-center d-none">
+    <!-- Player 1 Area -->
+    <div class="col-lg-5 d-flex justify-content-end">
+        <div class="player-area player1-area animate__animated animate__fadeInLeft">
+            <div class="player-header bg-primary text-white">
+                <h3 class="player-name" id="player1-display">Player 1</h3>
+                <div class="player-score">Score: <span id="player1-score">0</span>%</div>
+            </div>
+            <div class="camera-container">
+                <video id="player1-video" class="camera-feed" autoplay muted></video>
+                <canvas id="player1-face-canvas" class="face-overlay"></canvas>
+            </div>
+            <div class="canvas-container">
+                <canvas id="player1-canvas" class="drawing-canvas"></canvas>
+            </div>
+            <div class="player-controls">
+                <button id="player1-submit-btn" class="btn game-btn submit-btn" disabled>
+                    <i class="fas fa-check me-2"></i>Submit P1
+                </button>
+                <button id="player1-clear-btn" class="btn game-btn clear-btn">
+                    <i class="fas fa-eraser me-2"></i>Clear P1
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Center: Question and Timer -->
+    <div class="col-lg-2 d-flex flex-column align-items-center justify-content-center">
+        <div class="question-area animate__animated animate__fadeInDown">
+            <div class="question-header bg-success text-white">
+                <h3><i class="fas fa-question-circle me-2"></i>Challenge</h3>
+            </div>
+            <div class="question-content">
+                <p id="current-question" class="question-text">Loading question...</p>
+                <div class="timer-container">
+                    <div class="timer-circle">
+                        <span id="timer-display">30</span>
+                    </div>
+                    <p class="timer-label">Seconds Left</p>
+                </div>
+                <div class="turn-indicator">
+                    <p id="turn-display" class="turn-text">Get Ready!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player 2 Area -->
+    <div class="col-lg-5 d-flex justify-content-start">
+        <div class="player-area player2-area animate__animated animate__fadeInRight">
+            <div class="player-header bg-warning text-dark">
+                <h3 class="player-name" id="player2-display">Player 2</h3>
+                <div class="player-score">Score: <span id="player2-score">0</span>%</div>
+            </div>
+            <div class="camera-container">
+                <video id="player2-video" class="camera-feed" autoplay muted></video>
+                <canvas id="player2-face-canvas" class="face-overlay"></canvas>
+            </div>
+            <div class="canvas-container">
+                <canvas id="player2-canvas" class="drawing-canvas"></canvas>
+            </div>
+            <div class="player-controls">
+                <button id="player2-submit-btn" class="btn game-btn submit-btn" disabled>
+                    <i class="fas fa-check me-2"></i>Submit P2
+                </button>
+                <button id="player2-clear-btn" class="btn game-btn clear-btn">
+                    <i class="fas fa-eraser me-2"></i>Clear P2
+                </button>
+            </div>
+        </div>
+    </div>
+</div> 
